@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Sidebar from './Sidebar';
 import { useNavigate } from 'react-router-dom';
 import { useLabAuth } from '../context/LabAuthContext';
 
@@ -8,26 +9,27 @@ const LAB_USER_DETAILS = {
   employeeId: 'LAB-54321',
 };
 
+// Sidebar links for Lab Dashboard
+const LAB_PAGES = [
+  { name: 'Home (Sample List)', path: '/lab/dashboard' },
+  { name: 'Add Sample Data', path: '/lab/add-sample' },
+  { name: 'My Profile', path: '/lab/profile' },
+];
+
 const LabDashboard = () => {
-  const { setIsLabAuthenticated } = useLabAuth();
-  const navigate = useNavigate();
+  const { setIsLabAuthenticated } = useLabAuth(); // Required for Logout function in Sidebar
   const [samples, setSamples] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [updateMessage, setUpdateMessage] = useState('');
-
-  // Form State for Status Update
-  const [sampleID, setSampleID] = useState('');
-  const [newStatus, setNewStatus] = useState('In Progress');
-
-  const SAMPLE_STATUSES = ['Received', 'In Progress', 'Analysis Complete', 'Results Available'];
 
   const fetchSamples = async () => {
     try {
+      // Fetching all samples from the Flask backend
       const response = await fetch('http://localhost:5000/api/samples');
       if (!response.ok) { throw new Error(`HTTP error! status: ${response.status}`); }
       const data = await response.json();
-      // Sort samples so the oldest are at the top (or newest, depending on preference)
-      setSamples(data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)));
+      
+      // Sort samples by timestamp descending (newest first)
+      setSamples(data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)));
     } catch (error) {
       console.error("Failed to fetch sample data:", error);
     } finally {
@@ -35,130 +37,80 @@ const LabDashboard = () => {
     }
   };
 
-  const handleUpdateStatus = async (e) => {
-    e.preventDefault();
-    setUpdateMessage('Updating status...');
-
-    try {
-      const response = await fetch('http://localhost:5000/api/update-status', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ sampleID, newStatus }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        setUpdateMessage(`Success: ${result.message}`);
-        fetchSamples(); // Refresh table data after successful update
-      } else {
-        setUpdateMessage(`Error: ${result.error || 'Update failed.'}`);
-      }
-    } catch (error) {
-      console.error("Error updating status:", error);
-      setUpdateMessage('Network error occurred during update.');
-    }
-    setTimeout(() => setUpdateMessage(''), 3000); // Clear message after 3 seconds
-  };
-
-
   useEffect(() => {
     fetchSamples();
-    const intervalId = setInterval(fetchSamples, 5000); // Keep polling to show real-time changes
-    return () => clearInterval(intervalId);
+    // Set up polling for near real-time updates (every 5 seconds)
+    const intervalId = setInterval(fetchSamples, 5000); 
+    return () => clearInterval(intervalId); // Cleanup
   }, []);
 
-  const handleLogout = () => {
-    setIsLabAuthenticated(false);
-    navigate('/lab/login');
-  };
-
   if (loading) {
-    return <p>Loading lab data...</p>;
+    return (
+        <div className="dashboard-layout">
+            <Sidebar userType="LAB" pages={LAB_PAGES} />
+            <div className="dashboard-content">
+                <p style={{ padding: '20px' }}>Loading lab data...</p>
+            </div>
+        </div>
+    );
   }
 
   return (
-    <div className="dashboard-container">
-      <header className="dashboard-header lab-header">
-        <h1>Lab Sample Entry Dashboard</h1>
-        <div className="profile-section">
-          <div className="user-info">
-            <span className="user-name">Welcome, {LAB_USER_DETAILS.name}</span>
-            <span className="user-id">Dept: {LAB_USER_DETAILS.department}</span>
-          </div>
-          <button onClick={handleLogout} className="logout-button lab-logout-button">Log Out</button>
-        </div>
-      </header>
+    <div className="dashboard-layout">
+      {/* Sidebar handles navigation and logout */}
+      <Sidebar userType="LAB" pages={LAB_PAGES} />
       
-      <main className="dashboard-main lab-main">
-        <div className="status-update-form-card">
-          <h3>Update Sample Status</h3>
-          <form onSubmit={handleUpdateStatus} className="status-form">
-            <div className="form-group">
-              <label htmlFor="sampleID">Sample ID to Update:</label>
-              <input
-                type="text"
-                id="sampleID"
-                value={sampleID}
-                onChange={(e) => setSampleID(e.target.value)}
-                placeholder="e.g., ED-001"
-                required
-              />
+      <div className="dashboard-content">
+        <header className="dashboard-header lab-header">
+          <h1>Lab Sample Overview</h1>
+          <div className="profile-section">
+            <div className="user-info">
+              <span className="user-name">Welcome, {LAB_USER_DETAILS.name}</span>
+              <span className="user-id">Dept: {LAB_USER_DETAILS.department}</span>
             </div>
-
-            <div className="form-group">
-              <label htmlFor="newStatus">New Status:</label>
-              <select
-                id="newStatus"
-                value={newStatus}
-                onChange={(e) => setNewStatus(e.target.value)}
-                required
-              >
-                {SAMPLE_STATUSES.map(status => (
-                    <option key={status} value={status}>{status}</option>
-                ))}
-              </select>
-            </div>
-            
-            <button type="submit" className="update-button">Update Status</button>
-            {updateMessage && <p className={`update-message ${updateMessage.startsWith('Error') ? 'error' : 'success'}`}>{updateMessage}</p>}
-          </form>
-        </div>
-
-        <div className="samples-table-container lab-table">
-          <h2>All ED Samples</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Sample ID</th>
-                <th>Status</th>
-                <th>Patient ID</th>
-                <th>Time In Lab</th>
-              </tr>
-            </thead>
-            <tbody>
-              {samples.length > 0 ? (
-                samples.map((sample) => (
-                  <tr key={sample.sampleID}>
-                    <td>{sample.sampleID}</td>
-                    <td className={`status-${sample.status.replace(/\s+/g, '-').toLowerCase()}`}>
-                      {sample.status}
-                    </td>
-                    <td>{sample.patientID || 'N/A'}</td>
-                    <td>{new Date(sample.timestamp).toLocaleTimeString()}</td>
-                  </tr>
-                ))
-              ) : (
+          </div>
+        </header>
+        
+        <main className="dashboard-main lab-main">
+          <div className="samples-table-container lab-table">
+            <h2>All Samples in Queue ({samples.length} total)</h2>
+            <table>
+              <thead>
                 <tr>
-                  <td colSpan="4">No samples currently in the queue.</td>
+                  <th>Sample ID</th>
+                  <th>Patient ID</th>
+                  <th>Patient Name</th>
+                  <th>Test Requested</th>
+                  <th>Source</th>
+                  <th>Status</th>
+                  <th>Time Received</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </main>
+              </thead>
+              <tbody>
+                {samples.length > 0 ? (
+                  samples.map((sample) => (
+                    <tr key={sample.sampleID}>
+                      <td>{sample.sampleID}</td>
+                      <td>{sample.patientID || 'N/A'}</td>
+                      <td>{sample.patientName || 'N/A'}</td>
+                      <td>{sample.testType || 'N/A'}</td>
+                      <td>{sample.source || 'ED'}</td>
+                      <td className={`status-${sample.status.replace(/\s+/g, '-').toLowerCase()}`}>
+                        {sample.status}
+                      </td>
+                      <td>{new Date(sample.timestamp).toLocaleTimeString()}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="7">No samples currently in the queue. Add data using the sidebar link.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
