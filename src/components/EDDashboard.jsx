@@ -61,7 +61,6 @@ const EDDashboard = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sampleID, claimedBy: claimerName }),
       });
-
       if (!response.ok) {
         throw new Error(`Failed to claim report: Status ${response.status}`);
       }
@@ -78,17 +77,15 @@ const EDDashboard = () => {
     return () => clearInterval(intervalId);
   }, [fetchSamples]); 
 
-  // --- FIX: Chime on status change to 'Results Available' ---
   useEffect(() => {
-    const newResultsAvailable = samples.filter(currentSample => {
-      // Find the corresponding sample in the previous state
-      const previousSample = previousSamples.current.find(p => p.sampleID === currentSample.sampleID);
-      // Check if status changed TO 'Results Available'
-      return currentSample.status === 'Results Available' && previousSample?.status !== 'Results Available';
-    });
-    if (newResultsAvailable.length > 0) {
-      // FIX: Use .current to access the audio object from useRef
-      newSampleChime.current.play();
+    if (previousSamples.current.length > 0) {
+        const newCompleted = samples.filter(currentSample => {
+            const previousSample = previousSamples.current.find(p => p.sampleID === currentSample.sampleID);
+            return currentSample.status === 'Results Available' && previousSample?.status !== 'Results Available';
+        });
+        if (newCompleted.length > 0) {
+            newSampleChime.current.play();
+        }
     }
     previousSamples.current = samples;
   }, [samples, newSampleChime]);
@@ -101,7 +98,7 @@ const EDDashboard = () => {
   const { activeSamples, claimedSamples } = useMemo(() => {
     const now = new Date();
     const filterHours = {
-      '1hour': 1, '6hours': 6, '24hours': 24,
+      '1hour': 1, '12hours': 12, '24hours': 24,
     };
     const cutoffTime = now.getTime() - (filterHours[filter] * 60 * 60 * 1000);
     const lowerCaseSearch = searchTerm.toLowerCase();
@@ -192,8 +189,7 @@ const EDDashboard = () => {
             <h1 className="flex items-center">
               ED Dashboard
               <span className="ml-4 text-ed-blue text-sm">
-                {/* FIX: Render notification icon only when new results are available */}
-                {samples.filter(s => s.status === 'Results Available').length > previousSamples.current.filter(s => s.status === 'Results Available').length && (
+                {samples && samples.length > previousSamples.current.length && previousSamples.current.length !== 0 && (
                   <span className="relative flex h-3 w-3">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                     <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
@@ -227,6 +223,12 @@ const EDDashboard = () => {
                         </Bar>
                     </BarChart>
                 </ResponsiveContainer>
+            </div>
+            
+            <div className="filter-controls mb-4">
+                <button onClick={() => setFilter('1hour')} className={filter === '1hour' ? 'active' : ''}>Last 1 Hour</button>
+                <button onClick={() => setFilter('12hours')} className={filter === '12hours' ? 'active' : ''}>Last 12 Hours</button>
+                <button onClick={() => setFilter('24hours')} className={filter === '24hours' ? 'active' : ''}>Last 24 Hours</button>
             </div>
 
             <div className="flex justify-between items-center mt-4">
@@ -281,7 +283,7 @@ const EDDashboard = () => {
                             {sample.status === 'Results Available' && !sample.claimedBy ? (
                                 <button 
                                     onClick={() => handleClaimReport(sample.sampleID)} 
-                                    className="claim-report-button"
+                                    className="bg-blue-600 text-white px-2 py-1 rounded-md text-sm hover:bg-blue-700 transition duration-150"
                                 >
                                     Claim Report
                                 </button>
