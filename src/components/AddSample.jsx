@@ -99,9 +99,9 @@ const AddSample = () => {
           </div>
         </header>
         
-        <main className="dashboard-main lab-main">
+        <main className="dashboard-main">
           <div className="add-sample-form-card">
-            <h3>Enter New Specimen Details</h3>
+            <h3>Enter New Sample Details</h3>
             
             <form onSubmit={handleSubmit} className="sample-form">
               

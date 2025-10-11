@@ -1,8 +1,10 @@
-/* --- Global Resets & Base --- */
-html, body, #root {
+/* * GLOBAL STYLES & RESET 
+ * Ensures full height and proper box-sizing for responsive design.
+ */
+html, body, #root, .App {
   height: 100%;
   margin: 0;
-  box-sizing: border-box;
+  padding: 0;
 }
 
 body {
@@ -11,12 +13,13 @@ body {
   color: #333;
 }
 
-/* --- Login Page Styles (Minimalistic & Aesthetic) --- */
+/* * LOGIN PAGE STYLING (Used by Login.jsx and LabLogin.jsx)
+ */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  height: 100vh; 
   width: 100%;
   box-sizing: border-box;
 }
@@ -26,7 +29,7 @@ body {
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  width: 90%;
+  width: 90%; 
   max-width: 400px;
   text-align: center;
 }
@@ -51,7 +54,6 @@ body {
   font-weight: 500;
 }
 
-/* Specific styling for inputs within the login form */
 .login-form-card input[type="text"],
 .login-form-card input[type="password"],
 .login-form-card select { 
@@ -97,27 +99,36 @@ body {
   transform: translateY(-2px);
 }
 
-/* --- Dashboard Layout & Sidebar Styles --- */
+/* * MAIN DASHBOARD LAYOUT (Used by EDDashboard and LabDashboard)
+ */
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
 }
 
-.sidebar {
+/* --- Sidebar (FIXED) --- */
+.sidebar-container { /* Renamed for specificity */
+  position: fixed; /* Keeps the sidebar fixed as you scroll */
+  top: 0;           /* Sticks it to the top of the viewport */
+  left: 0;
   width: 250px;
+  height: 100vh;    /* Makes it fill the entire screen height */
   background-color: #2c3e50; /* Dark, professional color */
   color: white;
-  padding: 20px;
+  padding: 20px 0;
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  box-sizing: content-box; 
+  z-index: 1000; /* Ensures it stays on top of other content */
 }
 
 .sidebar-title {
-  color: #ecf0f1;
   text-align: center;
   margin-bottom: 30px;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #fff;
 }
 
 .sidebar-nav {
@@ -126,56 +137,94 @@ body {
   flex-grow: 1; /* Pushes the logout button to the bottom */
 }
 
-.nav-item {
-  color: #bdc3c7;
+.sidebar-nav-item {
+  display: block;
+  padding: 12px 20px;
   text-decoration: none;
-  padding: 12px 10px;
-  margin-bottom: 8px;
-  border-radius: 6px;
+  color: #bdc3c7;
+  font-size: 1rem;
   transition: background-color 0.2s, color 0.2s;
 }
 
-.nav-item:hover {
+.sidebar-nav-item:hover, .sidebar-nav-item.active {
   background-color: #34495e;
-  color: white;
+  color: #fff;
 }
 
-.nav-item.active {
-  background-color: #1abc9c; /* Highlight color for active link */
-  color: white;
-  font-weight: bold;
-}
-
-.sidebar-logout {
+.sidebar-logout-button {
+  width: 80%;
+  align-self: center; /* Center the button in the container */
+  margin-top: 20px; 
+  margin-bottom: 20px; 
   padding: 10px;
-  background-color: #e74c3c;
+  background-color: #e74c3c; /* Ensures a consistent red button */
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  margin-top: auto; /* Pushes it to the bottom */
   transition: background-color 0.2s;
 }
 
-.sidebar-logout:hover {
+.sidebar-logout-button:hover {
   background-color: #c0392b;
 }
 
+/* --- Main Content Area (FIXED) --- */
+.dashboard-content {
+  margin-left: 250px; /* Pushes the content to the right of the fixed sidebar */
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Responsive Adjustments for sidebar on mobile */
+@media (max-width: 768px) {
+  .dashboard-layout {
+    flex-direction: column;
+  }
+  .sidebar-container {
+    width: 100%;
+    height: auto;
+    padding: 10px 20px;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    position: static; /* Un-fix the sidebar on mobile */
+    z-index: auto;
+  }
+  .sidebar-title {
+    margin: 0;
+    font-size: 1rem;
+  }
+  .sidebar-nav {
+    display: none;
+  }
+  .sidebar-logout-button {
+    margin: 0;
+    font-size: 0.8rem;
+    padding: 6px 12px;
+  }
+  .dashboard-content {
+    margin-left: 0; /* Remove the margin on mobile */
+  }
+}
+
+/* --- Main Content Area --- */
 .dashboard-content {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
 }
 
-/* --- Dashboard Header --- */
+/* --- Header --- */
 .dashboard-header {
-  background-color: #007bff; /* Primary color for ED */
-  color: white;
+  background-color: #fff;
+  border-bottom: 1px solid #ddd;
   padding: 1rem 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .lab-header {
@@ -193,6 +242,7 @@ body {
   flex-direction: column;
   font-size: 0.9rem;
   text-align: right;
+  color: #333;
 }
 
 .user-name {
@@ -213,15 +263,65 @@ body {
   background-color: #c0392b;
 }
 
-/* --- Dashboard Main Content --- */
+/* --- Main Content Body --- */
 .dashboard-main {
   padding: 1.5rem 2rem;
   flex-grow: 1;
   overflow-y: auto;
 }
 
-/* --- Filter and Table Styles --- */
+/* * NEW STYLES: SEARCH AND PAGINATION
+ */
+.dashboard-search-field {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.dashboard-search-field-ed:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+.dashboard-search-field-lab:focus {
+    outline: none;
+    border-color: #27ae60;
+    box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.25);
+}
 
+.pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
+}
+.pagination-controls .page-info {
+    font-size: 0.9rem;
+    color: #555;
+}
+.pagination-controls .pagination-button {
+    padding: 0.5rem 1rem;
+    margin-left: 0.5rem;
+    border: 1px solid #ccc;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.pagination-controls .pagination-button:hover:not(:disabled) {
+    background-color: #e2eaf0;
+}
+.pagination-controls .pagination-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+
+/* * SAMPLE TABLE & STATUS COLORS 
+ */
 .filter-controls {
   margin-bottom: 1.5rem;
   text-align: left;
@@ -279,11 +379,12 @@ tr:hover {
   background-color: #f1f1f1;
 }
 
-/* Status Colors */
-.status-received { background-color: #f0ad4e; color: white; font-weight: bold; }
-.status-in-progress { background-color: #5bc0de; color: white; font-weight: bold; }
-.status-analysis-complete { background-color: #5cb85c; color: white; font-weight: bold; }
-.status-results-available { background-color: #007bff; color: white; font-weight: bold; }
+/* FIX: Semantic colors for status */
+.status-received { background-color: #efe9d6; color: #343a40; font-weight: bold; } /* Yellow */
+.status-in-progress { background-color: #ffff03; color: rgb(0, 0, 0); font-weight: bold; } /* Blue */
+.status-analysis-complete { background-color: #2eb8bf; color: white; font-weight: bold; } /* Green */
+.status-results-available { background-color: #14d71e; color: white; font-weight: bold; } /* Cyan */
+
 
 /* --- PROFILE CARD STYLING --- */
 .profile-view-container {
@@ -338,7 +439,7 @@ tr:hover {
   color: #333;
 }
 
-/* --- ADD SAMPLE FORM STYLING (MATCHING AddSample.jsx classes) --- */
+/* --- ADD SAMPLE FORM STYLING --- */
 .add-sample-form-card {
   background: #ffffff;
   padding: 2rem;
@@ -350,10 +451,9 @@ tr:hover {
 }
 
 .add-sample-form-card h3 {
-  color: #333;
+  text-align: center;
+  color: #005a87;
   margin-bottom: 1.5rem;
-  font-weight: 600;
-  font-size: 1.25rem;
 }
 
 .sample-form .form-group {
@@ -368,7 +468,6 @@ tr:hover {
   font-weight: 500;
 }
 
-/* Input/Select styling for the Add Sample Form */
 .sample-form input[type="text"],
 .sample-form select {
   width: 100%;
@@ -383,12 +482,11 @@ tr:hover {
 .sample-form input[type="text"]:focus,
 .sample-form select:focus {
   outline: none;
-  border-color: #27ae60; /* Lab specific focus color */
+  border-color: #27ae60;
   box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.25);
 }
 
-/* Submit Button styling */
-.sample-form .submit-button {
+.submit-button {
   width: 100%;
   padding: 0.75rem;
   background-color: #27ae60;
@@ -402,29 +500,9 @@ tr:hover {
   margin-top: 0.5rem;
 }
 
-.sample-form .submit-button:hover {
+.submit-button:hover {
   background-color: #219653;
   transform: translateY(-2px);
-}
-
-.status-message {
-  padding: 15px;
-  border-radius: 6px;
-  margin-top: 15px;
-  text-align: center;
-  font-weight: bold;
-}
-
-.status-message.success {
-  background-color: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
-}
-
-.status-message.error {
-  background-color: #f8d7da;
-  color: #721c24;
-  border: 1px solid #f5c6cb;
 }
 
 /* --- Responsive Adjustments --- */
@@ -432,11 +510,11 @@ tr:hover {
   .dashboard-layout {
     flex-direction: column;
   }
-  .sidebar {
+  .sidebar-container {
     width: 100%;
     height: auto;
     padding: 10px 20px;
-    flex-direction: row; /* Horizontal layout for mobile sidebar */
+    flex-direction: row;
     justify-content: space-between;
     align-items: center;
   }
@@ -445,9 +523,9 @@ tr:hover {
     font-size: 1rem;
   }
   .sidebar-nav {
-    display: none; /* Hide navigation on small screens to save space */
+    display: none;
   }
-  .sidebar-logout {
+  .sidebar-logout-button {
     margin: 0;
     font-size: 0.8rem;
     padding: 6px 12px;
@@ -463,4 +541,39 @@ tr:hover {
     align-items: flex-end;
     gap: 0.5rem;
   }
+}
+
+/* NEW STYLING FOR FORGOT PASSWORD BUTTON */
+.forgot-password-link {
+    width: 100%;
+    background: none;
+    border: none;
+    font-size: 0.9rem;
+    color: #007bff;
+    text-align: center;
+    cursor: pointer;
+    margin-top: 0.5rem;
+    text-decoration: underline;
+    transition: color 0.2s;
+}
+
+.forgot-password-link:hover {
+    color: #0056b3;
+}
+
+.claim-report-button {
+    background-color: #e6f2ff; /* A light, faded blue */
+    color: #004d99;
+    border: 1px solid #cce0ff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.claim-report-button:hover {
+    background-color: #cce0ff;
+    border-color: #007bff;
 }
