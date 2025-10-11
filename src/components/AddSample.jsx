@@ -1,214 +1,5 @@
-// import React, { useState } from 'react';
-// import Sidebar from './Sidebar';
-
-// const LAB_USER_DETAILS = {
-//   name: 'Sammy Sample',
-//   department: 'Clinical Chemistry',
-//   employeeId: 'LAB-54321',
-// };
-
-// const LAB_PAGES = [
-//   { name: 'Home (Sample List)', path: '/lab/dashboard' },
-//   { name: 'Add Sample Data', path: '/lab/add-sample' },
-//   { name: 'My Profile', path: '/lab/profile' },
-// ];
-
-// const AddSample = () => {
-//   const [formData, setFormData] = useState({
-//     patientName: '',
-//     patientID: '',
-//     testType: 'BMP',
-//     source: 'ED',
-//     // New fields
-//     dateOfSample: new Date().toISOString().substring(0, 10),
-//     timeOfSample: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-//     dateReported: new Date().toISOString().substring(0, 10),
-//   });
-//   const [message, setMessage] = useState('');
-//   const [error, setError] = useState(false);
-//   const [loading, setLoading] = useState(false);
-
-//   // Define options for the form selects
-//   const TEST_TYPES = ['BMP (Basic Metabolic Panel)', 'CMP (Comprehensive Metabolic Panel)', 'Troponin', 'PT/INR', 'CBC (Complete Blood Count)'];
-//   const SOURCE_DEPARTMENTS = ['ED', 'ICU', 'Floor 3', 'OR'];
-
-//   const handleChange = (e) => {
-//     const { name, value } = e.target;
-//     setFormData(prev => ({ ...prev, [name]: value }));
-//   };
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     setLoading(true);
-//     setMessage('');
-//     setError(false);
-
-//     // --- MOCKED BACKEND SIMULATION ---
-//     // Simulate an API call delay of 1 second for a smooth user experience
-//     setTimeout(() => {
-//         // --- Successful Mock Response ---
-//         const newSampleID = `MOCK-${Math.floor(Math.random() * 1000)}`;
-        
-//         setLoading(false);
-//         setError(false);
-//         setMessage(`Sample ${newSampleID} added successfully (MOCKED)! Status: Received`);
-
-//         // Clear form fields on success
-//         setFormData({
-//             patientName: '',
-//             patientID: '',
-//             testType: 'BMP',
-//             source: 'ED',
-//             dateOfSample: new Date().toISOString().substring(0, 10),
-//             timeOfSample: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-//             dateReported: new Date().toISOString().substring(0, 10),
-//         });
-        
-//         // Clear messages after 5 seconds
-//         setTimeout(() => setMessage(''), 5000); 
-
-//     }, 1000); // 1000ms delay to simulate network latency
-//     // --- END MOCKED BACKEND SIMULATION ---
-//   };
-
-//   return (
-//     <div className="dashboard-layout">
-//       <Sidebar userType="LAB" pages={LAB_PAGES} />
-      
-//       <div className="dashboard-content">
-//         <header className="dashboard-header lab-header">
-//           <h1>Lab: Add New Sample Data</h1>
-//           <div className="profile-section">
-//             <div className="user-info">
-//               <span className="user-name">Welcome, {LAB_USER_DETAILS.name}</span>
-//               <span className="user-id">Dept: {LAB_USER_DETAILS.department}</span>
-//             </div>
-//           </div>
-//         </header>
-        
-//         <main className="dashboard-main lab-main">
-//           <div className="add-sample-form-card">
-//             <h3>Enter New Specimen Details</h3>
-            
-//             <form onSubmit={handleSubmit} className="sample-form">
-              
-//               <div className="form-group">
-//                 <label htmlFor="patientName">Patient Name:</label>
-//                 <input
-//                   type="text"
-//                   id="patientName"
-//                   name="patientName"
-//                   value={formData.patientName}
-//                   onChange={handleChange}
-//                   placeholder="e.g., Jane Doe"
-//                   required
-//                 />
-//               </div>
-
-//               <div className="form-group">
-//                 <label htmlFor="patientID">Patient ID (MRN):</label>
-//                 <input
-//                   type="text"
-//                   id="patientID"
-//                   name="patientID"
-//                   value={formData.patientID}
-//                   onChange={handleChange}
-//                   placeholder="e.g., P-12345"
-//                   required
-//                 />
-//               </div>
-
-//               <div className="form-group">
-//                 <label htmlFor="testType">Test Requested:</label>
-//                 <select
-//                   id="testType"
-//                   name="testType"
-//                   value={formData.testType}
-//                   onChange={handleChange}
-//                   required
-//                 >
-//                   {TEST_TYPES.map(type => (
-//                     <option key={type} value={type.split(' ')[0]}>{type}</option>
-//                   ))}
-//                 </select>
-//               </div>
-              
-//               <div className="form-group">
-//                 <label htmlFor="source">Source Department:</label>
-//                 <select
-//                   id="source"
-//                   name="source"
-//                   value={formData.source}
-//                   onChange={handleChange}
-//                   required
-//                 >
-//                   {SOURCE_DEPARTMENTS.map(dept => (
-//                     <option key={dept} value={dept}>{dept}</option>
-//                   ))}
-//                 </select>
-//               </div>
-
-//               {/* Added new fields */}
-//               <div className="form-group">
-//                 <label htmlFor="dateOfSample">Date of Sample:</label>
-//                 <input
-//                   type="date"
-//                   id="dateOfSample"
-//                   name="dateOfSample"
-//                   value={formData.dateOfSample}
-//                   onChange={handleChange}
-//                   readOnly // Make this field non-editable
-//                 />
-//               </div>
-              
-//               <div className="form-group">
-//                 <label htmlFor="timeOfSample">Time of Sample:</label>
-//                 <input
-//                   type="time"
-//                   id="timeOfSample"
-//                   name="timeOfSample"
-//                   value={formData.timeOfSample}
-//                   onChange={handleChange}
-//                   readOnly // Make this field non-editable
-//                 />
-//               </div>
-
-//               <div className="form-group">
-//                 <label htmlFor="dateReported">Date Sample Reported:</label>
-//                 <input
-//                   type="date"
-//                   id="dateReported"
-//                   name="dateReported"
-//                   value={formData.dateReported}
-//                   onChange={handleChange}
-//                   readOnly // Make this field non-editable
-//                 />
-//               </div>
-
-//               <button type="submit" disabled={loading} className="submit-button">
-//                 {loading ? 'Adding Sample...' : 'Add Sample to Queue'}
-//               </button>
-//             </form>
-            
-//             {message && (
-//               <p className={`status-message ${error ? 'error' : 'success'}`}>
-//                 {message}
-//               </p>
-//             )}
-//           </div>
-//         </main>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default AddSample;
-
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
-
-// AWS API Gateway Endpoint
-const AWS_API_URL = 'https://twtti9ff9f.execute-api.us-east-1.amazonaws.com/dev/samples'; 
 
 const LAB_USER_DETAILS = {
   name: 'Sammy Sample',
@@ -228,7 +19,6 @@ const AddSample = () => {
     patientID: '',
     testType: 'BMP',
     source: 'ED',
-    // New fields initialized to current date/time
     dateOfSample: new Date().toISOString().substring(0, 10),
     timeOfSample: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
     dateReported: new Date().toISOString().substring(0, 10),
@@ -237,7 +27,6 @@ const AddSample = () => {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Define options for the form selects
   const TEST_TYPES = ['BMP (Basic Metabolic Panel)', 'CMP (Comprehensive Metabolic Panel)', 'Troponin', 'PT/INR', 'CBC (Complete Blood Count)'];
   const SOURCE_DEPARTMENTS = ['ED', 'ICU', 'Floor 3', 'OR'];
 
@@ -253,13 +42,11 @@ const AddSample = () => {
     setError(false);
 
     try {
-      // 1. Send data to AWS API Gateway (Lambda/DynamoDB)
-      const response = await fetch(AWS_API_URL, {
+      const response = await fetch('http://127.0.0.1:5000/api/add-sample', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        // The Lambda function needs this data payload
         body: JSON.stringify(formData),
       });
 
@@ -269,31 +56,30 @@ const AddSample = () => {
         throw new Error(result.error || `HTTP error! Status: ${response.status}`);
       }
 
-      // 2. Handle Success
       setLoading(false);
       setError(false);
-      setMessage(result.message || 'Sample added successfully.');
+      setMessage(`Success! Sample added.`);
 
-      // Clear form fields, keeping new sample date/time defaults
       setFormData({
-          patientName: '',
-          patientID: '',
-          testType: 'BMP',
-          source: 'ED',
-          dateOfSample: new Date().toISOString().substring(0, 10),
-          timeOfSample: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
-          dateReported: new Date().toISOString().substring(0, 10),
+        patientName: '',
+        patientID: '',
+        testType: 'BMP',
+        source: 'ED',
+        dateOfSample: new Date().toISOString().substring(0, 10),
+        timeOfSample: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }),
+        dateReported: new Date().toISOString().substring(0, 10),
       });
 
     } catch (err) {
-      // 3. Handle Failure
       console.error('API Submission Error:', err);
       setLoading(false);
       setError(true);
-      setMessage(`Submission Failed: ${err.message}. Check browser console for details.`);
-
+      if (err.message.includes('Failed to fetch')) {
+          setMessage(`Connection Failed: Please ensure the Flask server is running at 127.0.0.1:5000.`);
+      } else {
+          setMessage(`Submission Failed: ${err.message}.`);
+      }
     } finally {
-      // Clear messages after 5 seconds
       setTimeout(() => setMessage(''), 5000); 
     }
   };
@@ -375,7 +161,6 @@ const AddSample = () => {
                 </select>
               </div>
 
-              {/* Date/Time Fields */}
               <div className="form-group">
                 <label htmlFor="dateOfSample">Date of Sample:</label>
                 <input
@@ -417,7 +202,6 @@ const AddSample = () => {
               </button>
             </form>
             
-            {/* Success/Error Message Display */}
             {message && (
               <p className={`status-message ${error ? 'error' : 'success'}`}>
                 {message}

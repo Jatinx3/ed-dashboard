@@ -3,14 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Sidebar from './Sidebar';
 
-// User details are static for the demo
 const ED_USER_DETAILS = {
   name: 'Dr. Jane Doe',
   department: 'Emergency Department',
   employeeId: 'ED-12345',
 };
 
-// Define the navigation items for the Sidebar
 const ED_PAGES = [
     { name: 'Dashboard', path: '/dashboard' },
     { name: 'My Profile', path: '/dashboard/profile' },
@@ -21,28 +19,39 @@ const EDDashboard = () => {
   const navigate = useNavigate();
   const [samples, setSamples] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null); 
   const [filter, setFilter] = useState('24hours');
 
-  // Mock fetching logic (for demo without Flask server)
-  const fetchSamples = () => {
-      setLoading(true);
-      setTimeout(() => {
-          const mockData = [
-              { sampleID: 'ED-001', patientName: 'John Smith', testType: 'CRP, RLP', status: 'Analysis Complete', timestamp: new Date(Date.now() - 1000 * 60 * 35).toISOString() },
-              { sampleID: 'ED-002', patientName: 'Alice Brown', testType: 'eGFR', status: 'In Progress', timestamp: new Date(Date.now() - 1000 * 60 * 65).toISOString() },
-              { sampleID: 'ED-003', patientName: 'Mark Lee', testType: 'CRP, RLP, eGFR', status: 'Received', timestamp: new Date(Date.now() - 1000 * 60 * 180).toISOString() },
-              { sampleID: 'ED-004', patientName: 'Sarah King', testType: 'TSH', status: 'Results Available', timestamp: new Date(Date.now() - 1000 * 60 * 1440).toISOString() },
-          ];
-          setSamples(mockData);
+  const fetchSamples = async () => {
+      setLoading(true); 
+      setError(null);
+
+      try {
+          // Fetching live data from the Flask backend
+          const response = await fetch('http://127.0.0.1:5000/api/samples');
+          
+          if (!response.ok) {
+              throw new Error(`Failed to fetch: Status ${response.status}`);
+          }
+          
+          const data = await response.json();
+          setSamples(data);
+          
+      } catch (e) {
+          // Display error if server is down or unreachable
+          console.error("Connection Error:", e.message);
+          setError("Cannot connect to Lab Data Server. Please ensure backend is running.");
+      } finally {
           setLoading(false);
-      }, 500);
+      }
   };
 
   useEffect(() => {
+    // Initial fetch and setting up the 5-second polling interval
     fetchSamples();
     const intervalId = setInterval(fetchSamples, 5000);
     return () => clearInterval(intervalId);
-  }, []);
+  }, []); 
 
   const handleLogout = () => {
     setIsAuthenticated(false);
@@ -89,7 +98,13 @@ const EDDashboard = () => {
             </div>
             
             <div className="samples-table-container">
-              {loading ? (
+              {error && (
+                <div style={{ padding: '15px', backgroundColor: '#fdd', border: '1px solid red', borderRadius: '5px', marginBottom: '15px' }}>
+                  <strong>Connection Error:</strong> {error}
+                </div>
+              )}
+
+              {loading && !error ? (
                 <p>Loading samples...</p>
               ) : (
                 <table>
@@ -109,6 +124,7 @@ const EDDashboard = () => {
                           <td>{sample.sampleID}</td>
                           <td>{sample.patientName}</td>
                           <td>{sample.testType}</td>
+                          {/* Status column changes color based on the live status */}
                           <td className={`status-${sample.status.replace(/\s+/g, '-').toLowerCase()}`}>
                             {sample.status}
                           </td>
